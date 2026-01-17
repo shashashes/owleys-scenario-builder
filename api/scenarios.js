@@ -94,10 +94,12 @@ Core idea must be one of:
 - care protocol (senior dog, injury, allergy, motion sickness)
 
 Before naming a scenario, you MUST:
-1. Identify a real-life trigger event (not a category, not a persona).
-2. Identify a physical or emotional friction inside the car.
-3. Explain (internally) why each product is required and cannot be removed.
-4. If removing any product does not break the scenario, the scenario FAILS and must be rebuilt.
+1. Review the provided inventory and identify which products from it will be used in the scenario.
+2. Verify that every product you plan to use exists in the provided inventory. If any product does not match inventory, FAIL and rebuild.
+3. Identify a real-life trigger event (not a category, not a persona).
+4. Identify a physical or emotional friction inside the car.
+5. Explain (internally) why each product from inventory is required and cannot be removed.
+6. If removing any product does not break the scenario, the scenario FAILS and must be rebuilt.
 
 You must NOT output this reasoning.
 You must only output the final JSON.
@@ -182,7 +184,8 @@ export default async function handler(req, res) {
       task: "Generate non-trivial Owleys scenario pages from inventory.",
       n,
       constraints: constraints ?? {},
-      inventory
+      inventory,
+      critical_instruction: "You MUST use ONLY the products listed in 'inventory'. Do NOT add any products that are not in this list. Every product.title in your output must match exactly one item from the provided inventory."
     };
 
     console.log(`Requesting ${n} scenario(s) for ${inventory.length} products`);
