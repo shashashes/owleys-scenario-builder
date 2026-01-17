@@ -66,6 +66,14 @@ Naming requirement:
 - It must sound like something a real person could say: "We need a ___."
 - It must imply a story without explaining it.
 
+Two-phase generation (mandatory, internal):
+PHASE 1: Generate 10 candidate scenario seeds.
+Each seed = {name, trigger_event, core_friction}.
+Seeds must pass Naming requirement. If not, rewrite.
+PHASE 2: Select the best N seeds and expand them into full scenarios JSON.
+
+Do NOT output seeds. Output only final JSON.
+
 Before naming a scenario, you MUST:
 1. Identify a real-life trigger event (not a category, not a persona).
 2. Identify a physical or emotional friction inside the car.
