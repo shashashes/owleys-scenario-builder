@@ -176,25 +176,18 @@ export default async function handler(req, res) {
       // Если валидация не прошла, но есть сценарии в raw JSON - попробуем их использовать
       if (json.scenarios && Array.isArray(json.scenarios) && json.scenarios.length > 0) {
         console.warn('Schema validation failed, but using raw scenarios:', outParsed.error.flatten());
-        const wantN = n;
         const gotN = json.scenarios.length;
         
-        // Принимаем любое количество >= 1, даже если меньше запрошенного
+        // Всегда принимаем результат, если есть хотя бы 1 сценарий
         if (gotN < 1) {
           return res.status(502).json({
             error: "No scenarios returned",
-            want: wantN,
-            got: gotN,
             schema_errors: outParsed.error.flatten(),
             hint: "The model did not return any valid scenarios. Please try again.",
           });
         }
 
-        // Если вернулось меньше, чем запрашивалось, но хотя бы 1 - это OK
-        if (gotN < wantN) {
-          console.warn(`Requested ${wantN} scenarios but got ${gotN}. Schema validation failed but using raw scenarios.`);
-        }
-        
+        console.log(`Using raw scenarios despite validation errors. Got ${gotN} scenario(s).`);
         return res.json({ scenarios: json.scenarios });
       }
       
@@ -205,23 +198,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check number of scenarios (более гибкая валидация - принимаем любое количество >= 1)
-    const wantN = n;
+    // Проверяем, что есть хотя бы 1 сценарий
     const gotN = outParsed.data.scenarios.length;
 
     if (gotN < 1) {
       return res.status(502).json({
         error: "No scenarios returned",
-        want: wantN,
-        got: gotN,
         hint: "The model did not return any valid scenarios. Please try again.",
       });
     }
 
-    // Если вернулось меньше, чем запрашивалось, но хотя бы 1 - это OK, просто логируем предупреждение
-    if (gotN < wantN && gotN >= 1) {
-      console.warn(`Requested ${wantN} scenarios but got ${gotN}. Using what was returned.`);
-    }
+    // Всегда возвращаем результат, если есть хотя бы 1 сценарий
+    // Не проверяем количество запрошенных vs полученных - принимаем что есть
+    console.log(`Successfully received ${gotN} scenario(s)`);
 
     return res.json(outParsed.data);
   } catch (e) {
