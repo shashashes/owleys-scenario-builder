@@ -321,6 +321,10 @@ export default function App() {
             // product.title остается на английском (название товара)
             // Сопоставляем product.title с реальными товарами, чтобы использовать полные названия
             let productTitle = product.title || ''
+            
+            // Если product.title похож на артикул (начинается с "p 3014" или содержит только цифры и буквы с пробелами без полного названия)
+            const isArticleNumber = /^p\s*30\d{2}\s*\d+/i.test(productTitle) || /^[a-z]\s*\d{4}\s*\d+/i.test(productTitle)
+            
             const matchedItem = items.find(item => {
               // Проверяем по полному названию
               if (item.name && item.name.toLowerCase() === productTitle.toLowerCase()) {
@@ -330,18 +334,34 @@ export default function App() {
               if (item.sku && item.sku.toLowerCase() === productTitle.toLowerCase()) {
                 return true
               }
-              // Проверяем по частичному совпадению
-              if (item.name && productTitle && item.name.toLowerCase().includes(productTitle.toLowerCase())) {
+              // Проверяем по артикулу (если productTitle - это артикул)
+              if (item.sku && isArticleNumber && item.sku.toLowerCase().replace(/\s+/g, ' ').trim() === productTitle.toLowerCase().replace(/\s+/g, ' ').trim()) {
                 return true
               }
-              if (productTitle && item.name && productTitle.toLowerCase().includes(item.name.toLowerCase())) {
+              // Проверяем по частичному совпадению в названии (но только если это не артикул)
+              if (!isArticleNumber && item.name && productTitle && item.name.toLowerCase().includes(productTitle.toLowerCase())) {
+                return true
+              }
+              if (!isArticleNumber && productTitle && item.name && productTitle.toLowerCase().includes(item.name.toLowerCase())) {
                 return true
               }
               return false
             })
             
-            // Используем полное название товара (на английском), если нашли совпадение
-            const displayTitle = matchedItem ? matchedItem.name : productTitle
+            // Если не нашли совпадение и productTitle похож на артикул - пытаемся найти по артикулу напрямую
+            let displayTitle = matchedItem ? matchedItem.name : productTitle
+            if (!matchedItem && isArticleNumber) {
+              // Пробуем найти по артикулу, убрав пробелы и приведя к единому формату
+              const normalizedArticle = productTitle.replace(/\s+/g, ' ').trim().toLowerCase()
+              const foundByArticle = items.find(item => {
+                if (!item.sku) return false
+                const itemSku = item.sku.replace(/\s+/g, ' ').trim().toLowerCase()
+                return itemSku === normalizedArticle || itemSku.includes(normalizedArticle) || normalizedArticle.includes(itemSku)
+              })
+              if (foundByArticle) {
+                displayTitle = foundByArticle.name
+              }
+            }
             // product.role должен быть на русском (модель должна возвращать на русском)
             text += `${displayTitle} — ${product.role}\n`
           })
