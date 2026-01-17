@@ -63,16 +63,16 @@ function parseItems(rawRows) {
     const itemName = r['ITEM NAME'] ?? r['I T E M    N A M E'] ?? ''
     const finalName = String(itemName).trim()
     return {
-      itemId: String(r['Item ID'] ?? '').trim(),
-      pageId: String(r['Page ID'] ?? '').trim(),
+    itemId: String(r['Item ID'] ?? '').trim(),
+    pageId: String(r['Page ID'] ?? '').trim(),
       name: finalName,
-      stock: safeNum(r['Stock']),
-      type: String(r['Type'] ?? '').trim(),
-      status: String(r['Status'] ?? '').trim(),
-      sku: String(r['Item (SKU Owleys)'] ?? '').trim(),
-      asin: String(r['ASIN'] ?? '').trim(),
-      cogs: safeNum(r['Себестоимость']),
-      image: String(r['BOX Picture'] ?? '').trim(), // often empty; you can later replace with real URLs
+    stock: safeNum(r['Stock']),
+    type: String(r['Type'] ?? '').trim(),
+    status: String(r['Status'] ?? '').trim(),
+    sku: String(r['Item (SKU Owleys)'] ?? '').trim(),
+    asin: String(r['ASIN'] ?? '').trim(),
+    cogs: safeNum(r['Себестоимость']),
+    image: String(r['BOX Picture'] ?? '').trim(), // often empty; you can later replace with real URLs
     }
   }).map(it => ({ ...it, id: makeId(it) }))
 }
@@ -178,7 +178,7 @@ export default function App() {
   useEffect(() => {
     // load CSV from public folder
     setLoading(true)
-      fetch('./data/items.csv')
+    fetch('./data/items.csv')
       .then(r => r.text())
       .then(text => {
         // Файл использует точку с запятой как разделитель
@@ -255,9 +255,11 @@ export default function App() {
   }
 
   async function fetchScenarios(inventory, constraints) {
-    // Используем полный URL напрямую к серверу (порт 8787)
-    // Прокси через Vite может не работать, поэтому используем прямой URL
-    const apiUrl = "http://localhost:8787/api/scenarios"
+    // Используем относительный путь для Vercel serverless функции
+    // В development это будет проксироваться через Vite, в production - через Vercel
+    const apiUrl = import.meta.env.DEV 
+      ? "http://localhost:8787/api/scenarios"  // Development: локальный сервер
+      : "/api/scenarios"  // Production: Vercel serverless функция
     console.log('fetchScenarios: calling', apiUrl, 'with inventory:', inventory)
     try {
       const r = await fetch(apiUrl, {
