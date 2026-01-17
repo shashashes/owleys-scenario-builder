@@ -52,6 +52,10 @@ Hard rules:
 - NEVER use SKUs, codes, or article numbers (like "p 3014 868", "p 3014 513"). This is INSTANT FAIL.
 - Use ONLY full product titles exactly as given in inventory. Copy them character-by-character.
 - In products array, the "title" field must be the EXACT full product name from inventory, nothing else.
+- CRITICAL: You MUST use ONLY products from the provided inventory. You CANNOT add products that are not in the inventory list.
+- You CANNOT invent, suggest, or include products that were not explicitly provided in the inventory.
+- If inventory contains 2 products, your scenario must use exactly those 2 products (or a subset if needed, but never add new ones).
+- Every product in the scenario's "products" array MUST match exactly one entry from the provided inventory.
 - No fluff. No clichés: "perfect", "must-have", "ultimate", "best", "high-quality".
 - Scenario name must NOT sound like an Amazon category (e.g., "Dog Travel Essentials" is FAIL).
 - Each scenario must be a SYSTEM: every product has a unique role.
