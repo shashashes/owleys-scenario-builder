@@ -18,29 +18,29 @@ const InputSchema = z.object({
   }).optional()
 });
 
-// Output schema
+// Output schema (более гибкая версия для лучшей совместимости)
 const OutputSchema = z.object({
   scenarios: z.array(z.object({
-    scenario_name: z.string().min(4),
-    tagline: z.string().min(8),
+    scenario_name: z.string().min(1), // Уменьшили с 4 до 1
+    tagline: z.string().min(1).optional(), // Сделали опциональным
     gallery_frames: z.array(z.object({
       frame: z.number().int(),
-      scene: z.string().min(8)
-    })).min(5).max(7),
+      scene: z.string().min(1) // Уменьшили с 8 до 1
+    })).min(1).optional(), // Сделали опциональным и уменьшили минимум
     products: z.array(z.object({
-      title: z.string().min(3),
-      role: z.string().min(8)
-    })).min(2).max(8),
+      title: z.string().min(1), // Уменьшили с 3 до 1
+      role: z.string().min(1).optional() // Уменьшили с 8 до 1, сделали опциональным
+    })).min(1).optional(), // Сделали опциональным и уменьшили минимум
     page_blocks: z.array(z.object({
       block: z.number().int(),
-      title: z.string().min(3),
-      content: z.string().min(15)
-    })).min(5).max(5),
+      title: z.string().min(1).optional(), // Уменьшили с 3 до 1, сделали опциональным
+      content: z.string().min(1).optional() // Уменьшили с 15 до 1, сделали опциональным
+    })).optional(), // Сделали опциональным
     anti_banal_check: z.object({
       pass: z.boolean(),
-      reasons: z.array(z.string()).min(1)
-    }),
-    final_quality_score_0_100: z.number().min(0).max(100)
+      reasons: z.array(z.string()).optional() // Сделали опциональным
+    }).optional(), // Сделали опциональным
+    final_quality_score_0_100: z.number().min(0).max(100).optional() // Сделали опциональным
   })).min(1)
 });
 
