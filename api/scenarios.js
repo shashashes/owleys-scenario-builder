@@ -126,7 +126,8 @@ export default async function handler(req, res) {
     }
 
     const { inventory, constraints } = parsed.data;
-    const n = constraints?.n ?? 10;
+    // По умолчанию запрашиваем 1 сценарий, так как на фронтенде используется только первый
+    const n = constraints?.n ?? 1;
 
     // Initialize OpenAI client
     if (!process.env.OPENAI_API_KEY) {
@@ -178,15 +179,20 @@ export default async function handler(req, res) {
         const wantN = n;
         const gotN = json.scenarios.length;
         
-        if (gotN < wantN) {
+        // Принимаем любое количество >= 1, даже если меньше запрошенного
+        if (gotN < 1) {
           return res.status(502).json({
-            error: "Not enough scenarios returned",
+            error: "No scenarios returned",
             want: wantN,
             got: gotN,
-            scenario_names: json.scenarios.map(s => s?.scenario_name || 'Unknown'),
             schema_errors: outParsed.error.flatten(),
-            hint: "Increase model reliability by lowering n or re-running; or add internal retry loop.",
+            hint: "The model did not return any valid scenarios. Please try again.",
           });
+        }
+
+        // Если вернулось меньше, чем запрашивалось, но хотя бы 1 - это OK
+        if (gotN < wantN) {
+          console.warn(`Requested ${wantN} scenarios but got ${gotN}. Schema validation failed but using raw scenarios.`);
         }
         
         return res.json({ scenarios: json.scenarios });
@@ -199,18 +205,22 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check number of scenarios
+    // Check number of scenarios (более гибкая валидация - принимаем любое количество >= 1)
     const wantN = n;
     const gotN = outParsed.data.scenarios.length;
 
-    if (gotN < wantN) {
+    if (gotN < 1) {
       return res.status(502).json({
-        error: "Not enough scenarios returned",
+        error: "No scenarios returned",
         want: wantN,
         got: gotN,
-        scenario_names: outParsed.data.scenarios.map(s => s.scenario_name),
-        hint: "Increase model reliability by lowering n or re-running; or add internal retry loop.",
+        hint: "The model did not return any valid scenarios. Please try again.",
       });
+    }
+
+    // Если вернулось меньше, чем запрашивалось, но хотя бы 1 - это OK, просто логируем предупреждение
+    if (gotN < wantN && gotN >= 1) {
+      console.warn(`Requested ${wantN} scenarios but got ${gotN}. Using what was returned.`);
     }
 
     return res.json(outParsed.data);

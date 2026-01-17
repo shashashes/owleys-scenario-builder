@@ -292,7 +292,8 @@ export default function App() {
         category: item.type || ''
       }))
       
-      const constraints = {}
+      // Запрашиваем 1 сценарий (используется только первый результат)
+      const constraints = { n: 1 }
       const result = await fetchScenarios(inventory, constraints)
       
       // Преобразуем JSON-ответ сервера в текстовый формат для отображения

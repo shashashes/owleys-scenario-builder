@@ -32,3 +32,4 @@ git push -u origin main
 - API ключи должны храниться в переменных окружения
 - Для production используйте GitHub Actions или другой CI/CD
 
+
