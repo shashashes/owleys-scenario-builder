@@ -79,6 +79,14 @@ For each scenario, run an internal removability test:
 - Remove one product. If the scenario still works, FAIL and redesign the scenario or replace the product with one that is non-optional.
 You must only output scenarios that pass this test.
 
+Taboo angles: you must NOT base scenarios primarily on "clean", "organize", "protect".
+Those can exist, but cannot be the core idea.
+Core idea must be one of:
+- social tension (judgment, embarrassment, guest ride, date night)
+- time pressure (late pickup, vet run, school chaos, quick turnover)
+- transition moment (new car, after groomer, post-hike, rainy entry, rental return)
+- care protocol (senior dog, injury, allergy, motion sickness)
+
 Before naming a scenario, you MUST:
 1. Identify a real-life trigger event (not a category, not a persona).
 2. Identify a physical or emotional friction inside the car.
