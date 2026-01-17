@@ -74,6 +74,11 @@ PHASE 2: Select the best N seeds and expand them into full scenarios JSON.
 
 Do NOT output seeds. Output only final JSON.
 
+System test (mandatory):
+For each scenario, run an internal removability test:
+- Remove one product. If the scenario still works, FAIL and redesign the scenario or replace the product with one that is non-optional.
+You must only output scenarios that pass this test.
+
 Before naming a scenario, you MUST:
 1. Identify a real-life trigger event (not a category, not a persona).
 2. Identify a physical or emotional friction inside the car.
