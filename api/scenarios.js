@@ -55,6 +55,17 @@ Hard rules:
 - Each scenario must be a SYSTEM: every product has a unique role.
 - Gallery frames must be story scenes, not product shots.
 
+BANNED (instant FAIL):
+- names containing: Essentials, Bundle, Kit, Set, Pack, Starter, Travel, Roadtrip, Must, Ultimate, Best, Perfect
+- names that describe category: "Dog Car Pack", "Kids Backseat Bundle", "Interior Upgrade"
+- names that mention products: "Travel Buddy + Organizer"
+- names that are generic verbs: "Stay Organized", "Keep It Clean"
+
+Naming requirement:
+- Scenario name must be a "state label" or "moment label" (2–4 words).
+- It must sound like something a real person could say: "We need a ___."
+- It must imply a story without explaining it.
+
 Before naming a scenario, you MUST:
 1. Identify a real-life trigger event (not a category, not a persona).
 2. Identify a physical or emotional friction inside the car.
