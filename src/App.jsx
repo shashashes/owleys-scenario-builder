@@ -746,11 +746,6 @@ export default function App() {
         </div>
 
         <div className="topActions">
-          <button className="btn primary" onClick={exportJSON}>Export JSON</button>
-          <label className="btn">
-            Import JSON
-            <input type="file" accept="application/json" onChange={(e)=>e.target.files?.[0] && importJSONFile(e.target.files[0])} hidden />
-          </label>
           <button className="btn" onClick={exportScenarioCSV}>Export active CSV</button>
         </div>
       </header>
