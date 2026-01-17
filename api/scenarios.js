@@ -130,7 +130,11 @@ export default async function handler(req, res) {
 
     // Initialize OpenAI client
     if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({ error: "OPENAI_API_KEY not configured" });
+      console.error('OPENAI_API_KEY is not set in environment variables');
+      return res.status(500).json({ 
+        error: "OPENAI_API_KEY not configured",
+        hint: "Please add OPENAI_API_KEY to Vercel Environment Variables. Go to: Settings → Environment Variables → Add new variable."
+      });
     }
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
