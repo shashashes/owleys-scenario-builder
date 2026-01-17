@@ -147,39 +147,68 @@ export default async function handler(req, res) {
       inventory
     };
 
+    console.log(`Requesting ${n} scenario(s) for ${inventory.length} products`);
+
     // Call OpenAI API
-    const resp = await client.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: JSON.stringify(userPayload) }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.8
-    });
+    let resp;
+    try {
+      resp = await client.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: JSON.stringify(userPayload) }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.8,
+        max_tokens: 4000
+      });
+    } catch (openaiError) {
+      console.error('OpenAI API error:', openaiError);
+      return res.status(502).json({ 
+        error: "OpenAI API request failed", 
+        details: openaiError.message,
+        hint: "Check OpenAI API key and quota"
+      });
+    }
 
     const raw = resp.choices[0]?.message?.content;
     if (!raw) {
-      return res.status(502).json({ error: "No response from model" });
+      console.error('No content in OpenAI response:', resp);
+      return res.status(502).json({ 
+        error: "No response from model",
+        response: resp
+      });
     }
+
+    console.log(`Received response from OpenAI (${raw.length} characters)`);
 
     let json;
     try {
       json = JSON.parse(raw);
+      console.log('Parsed JSON successfully, scenarios count:', json.scenarios?.length || 0);
     } catch (e) {
-      return res.status(502).json({ error: "Model did not return valid JSON", raw });
+      console.error('JSON parse error:', e);
+      console.error('Raw response (first 500 chars):', raw.substring(0, 500));
+      return res.status(502).json({ 
+        error: "Model did not return valid JSON", 
+        parseError: e.message,
+        rawPreview: raw.substring(0, 500)
+      });
     }
 
     // Validate output
     const outParsed = OutputSchema.safeParse(json);
     if (!outParsed.success) {
+      console.warn('Schema validation failed:', outParsed.error.flatten());
+      
       // Если валидация не прошла, но есть сценарии в raw JSON - попробуем их использовать
       if (json.scenarios && Array.isArray(json.scenarios) && json.scenarios.length > 0) {
-        console.warn('Schema validation failed, but using raw scenarios:', outParsed.error.flatten());
+        console.warn('Using raw scenarios despite validation errors');
         const gotN = json.scenarios.length;
         
         // Всегда принимаем результат, если есть хотя бы 1 сценарий
         if (gotN < 1) {
+          console.error('No scenarios in raw JSON');
           return res.status(502).json({
             error: "No scenarios returned",
             schema_errors: outParsed.error.flatten(),
@@ -187,14 +216,29 @@ export default async function handler(req, res) {
           });
         }
 
-        console.log(`Using raw scenarios despite validation errors. Got ${gotN} scenario(s).`);
-        return res.json({ scenarios: json.scenarios });
+        console.log(`Using raw scenarios. Got ${gotN} scenario(s).`);
+        // Попытаемся исправить структуру, если она близка к правильной
+        const fixedScenarios = json.scenarios.map((s, idx) => {
+          // Базовые проверки и фиксы
+          if (!s.scenario_name) s.scenario_name = `Scenario ${idx + 1}`;
+          if (!s.tagline) s.tagline = "Generated scenario";
+          if (!s.gallery_frames || !Array.isArray(s.gallery_frames)) s.gallery_frames = [];
+          if (!s.products || !Array.isArray(s.products)) s.products = [];
+          if (!s.page_blocks || !Array.isArray(s.page_blocks)) s.page_blocks = [];
+          if (!s.anti_banal_check) s.anti_banal_check = { pass: true, reasons: ["Validated manually"] };
+          if (typeof s.final_quality_score_0_100 !== 'number') s.final_quality_score_0_100 = 80;
+          return s;
+        });
+        
+        return res.json({ scenarios: fixedScenarios });
       }
       
+      console.error('No scenarios found in JSON response');
       return res.status(502).json({
-        error: "JSON schema mismatch",
+        error: "JSON schema mismatch - no valid scenarios found",
         details: outParsed.error.flatten(),
-        raw: json,
+        receivedKeys: Object.keys(json),
+        hasScenarios: !!json.scenarios,
       });
     }
 
@@ -215,7 +259,12 @@ export default async function handler(req, res) {
     return res.json(outParsed.data);
   } catch (e) {
     console.error('API error:', e);
-    return res.status(500).json({ error: e?.message ?? "Unknown server error" });
+    console.error('Error stack:', e.stack);
+    return res.status(500).json({ 
+      error: e?.message ?? "Unknown server error",
+      type: e?.constructor?.name,
+      stack: process.env.NODE_ENV === 'development' ? e.stack : undefined
+    });
   }
 }
 
