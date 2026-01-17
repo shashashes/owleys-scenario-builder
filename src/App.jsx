@@ -862,7 +862,6 @@ export default function App() {
               </div>
               <div className="hint">
                 Нажмите "Добавить в сценарий" на карточках товаров слева.
-                <br/>Совет: добавим "car make/model" и шаблоны в v3.
                 <br/>
                 <button 
                   className="btn" 
