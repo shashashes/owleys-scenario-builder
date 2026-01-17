@@ -1,0 +1,11 @@
+{
+  "inventory": [
+    { "title": "Foldable Car Trunk Organizer \"Hexy\" 21.6-Inch Owleys", "category": "Organizers" },
+    { "title": "Foldable Car Trunk Organizer \"Hexy\" 17.7-Inch Owleys", "category": "Organizers" },
+    { "title": "Car Dog Hammock \"Travel Buddy Mk. II\" Owleys PRO", "category": "Pet Supplies" },
+    { "title": "Car Dog Ramp \"Tailgate\" Owleys", "category": "Pet Supplies" },
+    { "title": "Car Vacuum Cleaner Handheld Cordless 16000PA Owleys", "category": "Car Vacuums" },
+    { "title": "Refined Aroma Diffuser Black by Owleys", "category": "Air Freshener" }
+  ],
+  "constraints": { "focus": "Dog", "season": "Q1", "n": 5 }
+}

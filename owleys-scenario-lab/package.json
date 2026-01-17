@@ -1,0 +1,19 @@
+{
+  "name": "owleys-scenario-lab",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "openai": "^6.16.0",
+    "zod": "^4.3.5"
+  },
+  "type": "module"
+}

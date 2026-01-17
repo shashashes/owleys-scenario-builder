@@ -1,0 +1,21 @@
+Примеры товаров для добавления изображений:
+
+1. p-3014-512 → Hanging Car Trunk Organizer "Hold&Go"
+   Файл: p-3014-512.jpg или OUTR02-05A.jpg
+
+2. p-3014-20 → Dog Car Seat Cover "Travel Buddy"
+   Файл: p-3014-20.jpg или OUPS01-00A.jpg
+
+3. p-3014-10 → Foldable Car Trunk Organizer "Hexy" 17,7-Inch
+   Файл: p-3014-10.jpg или OUTR01-01A.jpg
+
+4. p-3014-9 → Foldable Car Trunk Organizer "Hexy" 21,6-Inch
+   Файл: p-3014-9.jpg или OUTR01-01B.jpg
+
+5. p-3014-17 → Car Seat Protector Mat "Hexy"
+   Файл: p-3014-17.jpg или OUSC01-01A.jpg
+
+... и так далее для всех товаров из CSV.
+
+Поместите файлы в эту папку и запустите: node scripts/add-images.js
+
