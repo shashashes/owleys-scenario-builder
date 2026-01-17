@@ -52,6 +52,8 @@ Hard rules:
 - NEVER use SKUs, codes, or article numbers (like "p 3014 868", "p 3014 513"). This is INSTANT FAIL.
 - Use ONLY full product titles exactly as given in inventory. Copy them character-by-character.
 - In products array, the "title" field must be the EXACT full product name from inventory, nothing else.
+- Before outputting JSON, verify every product.title exactly matches one inventory[].title entry.
+- If you see article numbers or codes in any form, STOP and rewrite using exact inventory titles only.
 - CRITICAL: You MUST use ONLY products from the provided inventory. You CANNOT add products that are not in the inventory list.
 - You CANNOT invent, suggest, or include products that were not explicitly provided in the inventory.
 - If inventory contains 2 products, your scenario must use exactly those 2 products (or a subset if needed, but never add new ones).
@@ -293,11 +295,65 @@ export default async function handler(req, res) {
       });
     }
 
-    // Всегда возвращаем результат, если есть хотя бы 1 сценарий
-    // Не проверяем количество запрошенных vs полученных - принимаем что есть
-    console.log(`Successfully received ${gotN} scenario(s)`);
+    // Валидация и исправление названий товаров - проверяем соответствие inventory
+    const inventoryTitles = inventory.map(item => item.title.toLowerCase().trim());
+    const fixedScenarios = outParsed.data.scenarios.map(scenario => {
+      if (!scenario.products || !Array.isArray(scenario.products)) {
+        return scenario;
+      }
 
-    return res.json(outParsed.data);
+      const fixedProducts = scenario.products.map(product => {
+        const productTitle = product.title || '';
+        const productTitleLower = productTitle.toLowerCase().trim();
+        
+        // Проверяем, является ли это артикулом (паттерн "p 3014 ...")
+        const isArticleNumber = /^p\s*30\d{2}\s*\d+/i.test(productTitle) || /^[a-z]\s*\d{4}\s*\d+/i.test(productTitle);
+        
+        // Проверяем точное совпадение с inventory
+        const exactMatch = inventory.find(item => item.title.toLowerCase().trim() === productTitleLower);
+        
+        if (exactMatch) {
+          // Точное совпадение - используем оригинальное название из inventory
+          return { ...product, title: exactMatch.title };
+        }
+        
+        if (isArticleNumber) {
+          // Это артикул - пытаемся найти товар по inventory titles (может содержать артикул в названии)
+          const foundByPartial = inventory.find(item => {
+            const itemLower = item.title.toLowerCase().trim();
+            // Пробуем найти по частичному совпадению в названии
+            return itemLower.includes(productTitleLower.replace(/\s+/g, ' ')) || 
+                   productTitleLower.replace(/\s+/g, ' ').includes(itemLower.substring(0, 10));
+          });
+          
+          if (foundByPartial) {
+            console.warn(`Fixed article number "${productTitle}" → "${foundByPartial.title}"`);
+            return { ...product, title: foundByPartial.title };
+          }
+        }
+        
+        // Если не нашли - пробуем частичное совпадение (для случаев когда название немного отличается)
+        const partialMatch = inventory.find(item => {
+          const itemLower = item.title.toLowerCase().trim();
+          return itemLower.includes(productTitleLower) || productTitleLower.includes(itemLower.substring(0, 20));
+        });
+        
+        if (partialMatch) {
+          console.warn(`Fixed product title "${productTitle}" → "${partialMatch.title}"`);
+          return { ...product, title: partialMatch.title };
+        }
+        
+        // Если ничего не нашли, оставляем как есть, но логируем предупреждение
+        console.warn(`Product title "${productTitle}" does not match any inventory item`);
+        return product;
+      });
+
+      return { ...scenario, products: fixedProducts };
+    });
+
+    console.log(`Successfully received ${gotN} scenario(s) and validated product titles`);
+
+    return res.json({ scenarios: fixedScenarios });
   } catch (e) {
     console.error('API error:', e);
     console.error('Error stack:', e.stack);
